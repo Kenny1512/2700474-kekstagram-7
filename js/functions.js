@@ -1,48 +1,68 @@
-let stringLength = function (str, len) {
-  return str.length <= len;
+import {messages, names, descriptions} from './data.js';
+
+const getRandomInt = function (min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 };
-// Cтрока короче 20 символов
-stringLength('проверяемая строка', 20); // true
-// Длина строки ровно 18 символов
-stringLength('проверяемая строка', 18); // true
-// Строка длиннее 10 символов
-stringLength('проверяемая строка', 10); // false
 
+const getUniqueID = function () {
+  let currentID = 0;
+  return function () {
+    return ++currentID;
+  };
+};
 
-let isPalindrome = function(str) {
-  let newStr = String(str).replaceAll(' ', '').toLowerCase();
-  let emptyStr = '';
+const nextPhotoId = getUniqueID();
+const nextUrlId = getUniqueID();
+const nextCommentId = getUniqueID();
 
-  for (let i = newStr.length - 1; i >= 0; i--) {
-    emptyStr += newStr.at(i);
+const createComment = function () {
+  const sentencesCount = getRandomInt(1, 2);
+  const commentMessage = [];
+
+  while (commentMessage.length < sentencesCount) {
+    const randomComment = messages[getRandomInt(0, messages.length - 1)];
+
+    if (!commentMessage.includes(randomComment)) {
+      commentMessage.push(randomComment);
+    }
+  }
+  return commentMessage.join(' ');
+};
+
+const getComments = function (amount) {
+  const comments = [];
+
+  for (let i = 0; i < amount; i++) {
+    const comment = {
+      id : nextCommentId(),
+      avatar : 'img/avatar-' + getRandomInt(1, 6) + '.svg',
+      message : createComment(),
+      name : names[getRandomInt(0, names.length - 1)],
+    };
+    comments.push(comment);
   }
 
-  return emptyStr === newStr;
+  return comments;
 };
-// Строка является палиндромом
-isPalindrome('топот'); // true
-// Несмотря на разный регистр, тоже палиндром
-isPalindrome('ДовОд'); // true
-// Это не палиндром
-isPalindrome('Кекс');  // false
-// Это палиндром
-isPalindrome('Лёша на полке клопа нашёл '); // true
 
-let nums = function(str) {
-  let numStr = String(str).replace(/\D/g, '');
-  let num = Math.abs(Number(numStr));
-  if (numStr == '') {
-    return 'NaN';
-  }
-  else {
-    return num;
-  }
+const createPhotoDescription = function () {
+  return {
+    id : nextPhotoId(),
+    url : 'photos/' + nextUrlId() + '.jpg',
+    description : descriptions[getRandomInt(0, descriptions.length - 1)],
+    likes : getRandomInt(15, 200),
+    comments : getComments(getRandomInt(0, 30))
+  };
 };
-nums('2023 год');            // 2023
-nums('ECMAScript 2022');     // 2022
-nums('1 кефир, 0.5 батона'); // 105
-nums('агент 007');           // 7
-nums('а я томат');           // NaN
-nums(2023); // 2023
-nums(-1);   // 1
-nums(1.5);  // 15
+
+const generatePhotos = function (count = 25) {
+  const photos = [];
+  for (let i = 0; i < count; i++) {
+    photos.push(createPhotoDescription());
+  }
+  return photos;
+};
+
+export {getRandomInt, getUniqueID, createComment, getComments, createPhotoDescription, generatePhotos};
